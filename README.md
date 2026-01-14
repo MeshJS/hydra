@@ -1,6 +1,6 @@
 # @meshsdk/hydra
 
-A powerful TypeScript SDK for interacting with Hydra Heads on Cardano. Hydra is a layer 2 scaling solution that increases transaction throughput and ensures cost efficiency while maintaining rigorous security.
+A powerful TypeScript SDK for interacting with Hydra Heads on Cardano.
 
 [![npm version](https://img.shields.io/npm/v/@meshsdk/hydra)](https://www.npmjs.com/package/@meshsdk/hydra)
 [![Documentation](https://img.shields.io/badge/docs-meshjs.dev-blue)](https://meshjs.dev/hydra)
@@ -29,15 +29,12 @@ npm install @meshsdk/hydra
 import { HydraProvider, HydraInstance } from "@meshsdk/hydra";
 import { BlockfrostProvider } from "@meshsdk/core";
 
-// Create a Hydra provider connection
 const hydraProvider = new HydraProvider({
   httpUrl: "http://localhost:4001", // Your Hydra node URL
 });
 
-// Connect to the Hydra Head
 await hydraProvider.connect();
 
-// Create a Hydra instance for interacting with the head
 const blockchainProvider = new BlockfrostProvider("YOUR_BLOCKFROST_KEY");
 
 const hydraInstance = new HydraInstance({
@@ -50,7 +47,6 @@ const hydraInstance = new HydraInstance({
 ### Initialize a Head
 
 ```typescript
-// Initialize a new Hydra Head
 await hydraProvider.init();
 
 // Wait for all parties to commit
@@ -60,7 +56,6 @@ await hydraProvider.init();
 ### Commit Funds
 
 ```typescript
-// Commit an empty transaction (no funds)
 const emptyCommitTx = await hydraInstance.commitEmpty();
 await wallet.submitTx(emptyCommitTx);
 
@@ -69,7 +64,6 @@ await wallet.submitTx(emptyCommitTx);
 ### Submit Transactions in Hydra Head
 
 ```typescript
-// Once the head is open, you can submit transactions
 const txHash = await hydraProvider.newTx({
   type: "Tx ConwayEra",
   cborHex: unsignedTransactionCbor,
@@ -86,10 +80,10 @@ The main class for connecting to and managing Hydra Heads.
 
 ```typescript
 new HydraProvider({
-  httpUrl: string;        // HTTP URL of the Hydra node
-  wsUrl?: string;        // Optional WebSocket URL
-  history?: boolean;     // Whether to request history (default: false)
-  address?: string;      // Optional address for filtering
+  httpUrl: string;       
+  wsUrl?: string;      
+  history?: boolean;     
+  address?: string;      
 })
 ```
 
@@ -151,9 +145,9 @@ A higher-level interface for interacting with Hydra Heads, providing convenient 
 
 ```typescript
 new HydraInstance({
-  provider: HydraProvider;  // The Hydra provider instance
-  fetcher: IFetcher;        // Fetcher for blockchain data
-  submitter: ISubmitter;   // Submitter for transactions
+  provider: HydraProvider;
+  fetcher: 'blockchainProvider';       
+  submitter: 'blockchainProvider';   
 })
 ```
 
@@ -190,22 +184,18 @@ const hydraInstance = new HydraInstance({
   submitter: blockchainProvider,
 });
 
-// Connect and initialize
 await hydraProvider.connect();
 await hydraProvider.init();
 
-// Commit funds
 const commitTx = await hydraInstance.commitFunds(txHash, outputIndex);
 await wallet.submitTx(commitTx);
 
-// Wait for head to open (listen for HeadIsOpen event)
-hydraProvider.on("HeadIsOpen", async () => {
-  // Build a transaction using Mesh
+hydraProvider.onMessage("HeadIsOpen", async () => {
   const txBuilder = new MeshTxBuilder({
     fetcher: blockchainProvider,
     submitter: blockchainProvider,
     params: await hydraProvider.fetchProtocolParameters(),
-    isHydra: true, // Important: set isHydra to true
+    isHydra: true, 
   });
 
   // Add your transaction logic
@@ -213,7 +203,6 @@ hydraProvider.on("HeadIsOpen", async () => {
     .sendLovelace(address, "1000000")
     .complete();
 
-  // Submit to Hydra Head
   const txHash = await hydraProvider.newTx({
     type: "Tx ConwayEra",
     cborHex: unsignedTx,
@@ -236,7 +225,6 @@ const hydraProvider = new HydraProvider({
 
 await hydraProvider.connect();
 
-// Listen to all messages
 hydraProvider.onMessage((message) => {
   switch (message.tag) {
     case "Greetings":
@@ -255,36 +243,6 @@ hydraProvider.onMessage((message) => {
       console.log("New snapshot:", message.snapshot);
       break;
   }
-});
-```
-
-### Using with Mesh Transaction Builder
-
-```typescript
-import { MeshTxBuilder } from "@meshsdk/core";
-
-// Fetch protocol parameters from Hydra Head
-const params = await hydraProvider.fetchProtocolParameters();
-const utxos = await hydraProvider.fetchUTxOs();
-
-// Create transaction builder with isHydra flag
-const txBuilder = new MeshTxBuilder({
-  fetcher: blockchainProvider,
-  submitter: blockchainProvider,
-  params: params,
-  isHydra: true, // Critical: enables Hydra-specific transaction building
-});
-
-// Build your transaction
-const unsignedTx = await txBuilder
-  .sendLovelace(recipientAddress, "5000000")
-  .sendAssets(recipientAddress, [{ unit: "assetId", quantity: "1" }])
-  .complete();
-
-// Submit to Hydra Head
-const txHash = await hydraProvider.newTx({
-  type: "Tx ConwayEra",
-  cborHex: unsignedTx,
 });
 ```
 
