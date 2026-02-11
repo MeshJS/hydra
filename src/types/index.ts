@@ -6,3 +6,4 @@ export * from "./hydra/hydraUTxOs";
 export * from "./client-input";
 export * from "./client-message";
 export * from "./server-output";
+export * from "./events/connection";
