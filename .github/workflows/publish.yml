@@ -1,7 +1,6 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
-# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+# Publish @meshsdk/hydra to npm when a PR to main is merged and package version was updated.
 
-name: Publish Mesh SDK Hydra
+name: Publish @meshsdk/hydra
 
 on:
   pull_request:
@@ -47,7 +46,7 @@ jobs:
       - name: Checkout main branch at commit after merge
         uses: actions/checkout@v4
         with:
-          ref: "main"
+          ref: main
 
       - name: Get package version from main branch after merge
         id: post-merge-version
@@ -59,9 +58,9 @@ jobs:
         id: compare-versions
         run: |
           if [[ "${{ steps.pre-merge-version.outputs.pre_merge_version }}" != "${{ steps.post-merge-version.outputs.post_merge_version }}" ]]; then
-              echo "version-updated=true" >> "$GITHUB_OUTPUT"
+            echo "version-updated=true" >> "$GITHUB_OUTPUT"
           else
-              echo "version-updated=false" >> "$GITHUB_OUTPUT"
+            echo "version-updated=false" >> "$GITHUB_OUTPUT"
           fi
 
   publish-meshsdk-hydra:
@@ -77,4 +76,4 @@ jobs:
       - run: npm install && npm run build
       - run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}

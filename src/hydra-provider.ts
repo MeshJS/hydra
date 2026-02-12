@@ -119,12 +119,10 @@ export class HydraProvider implements IFetcher, ISubmitter {
  * - Accurate state tracking
  */
   async isConnected(timeoutMs = 30_000): Promise<boolean> {
-    // Fast path
     if (this._connectionState === "CONNECTED") {
       return true;
     }
 
-    // Reuse in-flight connection
     if (this._connectingPromise) {
       return this._connectingPromise;
     }
